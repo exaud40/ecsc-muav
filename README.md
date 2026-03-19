@@ -2,10 +2,10 @@
 
 ## Authors
 
-**Authors:** Exaud Tarimo, Huanlai Xing*, Lexi Xu, Zonghai Zhu and Li Feng  
-School of Computing and Artificial Intelligence, Southwest Jiaotong University, Chengdu, China  
-Engineering Research Center of Sustainable Urban Intelligent Transportation, Ministry of Education, Chengdu, China  
-†Research Institute, China United Network Communications Corporation, Beijing, China
+**Authors:** Exaud Tarimo†‡, Huanlai Xing†‡*, Lexi Xu§, Zonghai Zhu† and Li Feng†  
+†School of Computing and Artificial Intelligence, Southwest Jiaotong University, Chengdu, China  
+‡Engineering Research Center of Sustainable Urban Intelligent Transportation, Ministry of Education, Chengdu, China  
+§Research Institute, China United Network Communications Corporation, Beijing, China
 
 
 ---
@@ -47,7 +47,7 @@ ECSC-MUAV addresses this by introducing a **task-oriented semantic communication
 
 ##  System Architecture
 
-![System Architecture](/system_architecture.pdf)
+![System Architecture](figures/system_architecture.png)
 
 **Pipeline Overview:**
 1. UAVs capture multi-view images  
