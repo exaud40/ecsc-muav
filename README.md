@@ -6,8 +6,8 @@
 †School of Computing and Artificial Intelligence, Southwest Jiaotong University, Chengdu, China  
 ‡Engineering Research Center of Sustainable Urban Intelligent Transportation, Ministry of Education, Chengdu, China  
 §Research Institute, China United Network Communications Corporation, Beijing, China
-
-
+** Corresponding Author 
+Paper Link: (TBD)
 ---
 
 ##  Overview
@@ -81,27 +81,15 @@ ECSC-MUAV demonstrates strong performance on remote sensing datasets:
 ##  Requirements
 
 ###  Environment
-- Python 3.10
-- PyTorch 2.5.1+cu121
-- CUDA-enabled GPU (recommended)
+- Python 3.1x
+- PyTorch 2.5.x
 
 ###  Dependencies
 
-```python
-import os
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-
-from torchvision import transforms
-from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader
-from tqdm import tqdm
-
-from transformers import CLIPModel
-import torchvision.models as models
-from thop import profile
+```
+-NumPy
+-Matplotlib
+-Scikit-image
 ```
 
 ###  Install Packages
@@ -141,10 +129,10 @@ cd ECSC-MUAV
 If you find this work useful, please cite:
 
 ```bibtex
-@article{ecscc_muav_2026,
+@article{ecsc_muav_2026,
   title={Energy-Calibrated Task-Oriented Communication for Cooperative Multi-UAV Edge Inference},
   author={Tarimo, Exaud and Xing, Huanlai and Xu, Lexi and Zhu, Zonghai and Feng, Li},
-  journal={IEEE Signal Processing Letters},
+  journal={TBD},
   year={2026}
 }
 ```
@@ -154,8 +142,6 @@ If you find this work useful, please cite:
 ##  Contact
 
 For questions or collaborations:
-
-- **Huanlai Xing** (Corresponding Author)  
 - Email: exaudtarimo@my.swjtu.edu.cn  
 
 ---
