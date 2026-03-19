@@ -1,7 +1,12 @@
 #  Energy-Calibrated Task-Oriented Communication for Cooperative Multi-UAV Edge Inference
 
-##  **Authors**: Exaud Tarimo, Huanlai Xing* , Lexi Xu, Zonghai Zhu and Li Feng
-- * (Corresponding Author)
+## Authors
+
+**Authors:** Exaud Tarimo, Huanlai Xing*, Lexi Xu, Zonghai Zhu and Li Feng  
+School of Computing and Artificial Intelligence, Southwest Jiaotong University, Chengdu, China  
+Engineering Research Center of Sustainable Urban Intelligent Transportation, Ministry of Education, Chengdu, China  
+†Research Institute, China United Network Communications Corporation, Beijing, China
+
 
 ---
 
