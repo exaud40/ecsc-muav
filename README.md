@@ -1,0 +1,167 @@
+#  Energy-Calibrated Task-Oriented Communication for Cooperative Multi-UAV Edge Inference
+
+##  Authors
+- **Exaud Tarimo**
+- **Huanlai Xing*** (Corresponding Author)
+- **Lexi Xu**
+- **Zonghai Zhu**
+- **Li Feng**
+
+---
+
+##  Overview
+
+This repository provides the official implementation of:
+
+> **Energy-Calibrated Semantic Communication for Multi-UAV (ECSC-MUAV)**
+
+Multi-UAV systems are increasingly used for collaborative perception and real-time edge intelligence in next-generation wireless networks. However, transmitting high-dimensional data over bandwidth-limited and noisy channels introduces significant challenges.
+
+ECSC-MUAV addresses this by introducing a **task-oriented semantic communication framework** that:
+- Reduces redundant transmissions
+- Preserves task-relevant semantic information
+- Improves robustness under low SNR conditions
+- Optimizes energy consumption for UAV systems
+
+---
+
+##  Key Features
+
+-  **Lightweight Semantic Encoder**  
+  Extracts compact and task-relevant representations from high-dimensional UAV observations.
+
+-  **Energy-Based Calibration (EnergyNet)**  
+  Enforces semantic alignment between transmitted and fused features using an energy-based model.
+
+-  **Selective Retransmission Strategy**  
+  Dynamically requests retransmission only for unreliable semantic components.
+
+-  **Robust to Low SNR Conditions**  
+  Maintains high inference accuracy under noisy wireless channels.
+
+-  **Energy-Efficient Design**  
+  Reduces transmission cost and UAV energy consumption.
+
+---
+
+##  System Architecture
+
+![System Architecture](/system_architecture.pdf)
+
+**Pipeline Overview:**
+1. UAVs capture multi-view images  
+2. CLIP-based feature extraction  
+3. Lightweight semantic encoding  
+4. Transmission over noisy wireless channel  
+5. Edge server decoding + feature fusion  
+6. Energy-based semantic calibration (EnergyNet)  
+7. Task-specific inference  
+
+---
+
+##  Results
+
+ECSC-MUAV demonstrates strong performance on remote sensing datasets:
+
+###  Key Outcomes
+-  **+4% ~ 7% accuracy improvement** under low SNR  
+-  **Up to 18% reduction in energy consumption**  
+-  Improved robustness to:
+  - Channel noise  
+  - UAV drop-out  
+  - Bandwidth constraints  
+
+###  Datasets
+- **UC Merced Land Use**
+- **RSSCN7**
+
+---
+
+##  Requirements
+
+###  Environment
+- Python 3.10
+- PyTorch 2.5.1+cu121
+- CUDA-enabled GPU (recommended)
+
+###  Dependencies
+
+```python
+import os
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+from transformers import CLIPModel
+import torchvision.models as models
+from thop import profile
+```
+
+###  Install Packages
+
+```bash
+pip install torch torchvision transformers tqdm thop
+```
+
+---
+
+##  Getting Started
+
+```bash
+git clone https://github.com/exaud40/ECSC-MUAV.git
+cd ECSC-MUAV
+```
+
+*(Add training/inference scripts here when ready)*
+
+---
+
+##  Method Highlights
+
+### 🔹 Energy-Calibrated Semantic Alignment
+- Models semantic consistency using an **energy function**
+- Lower energy → stronger alignment between UAV features
+
+### 🔹 Selective Retransmission
+- Confidence-driven stopping criterion
+- Attention-based UAV scheduling
+- Minimizes unnecessary communication
+
+---
+
+##  Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@article{ecscc_muav_2026,
+  title={Energy-Calibrated Task-Oriented Communication for Cooperative Multi-UAV Edge Inference},
+  author={Tarimo, Exaud and Xing, Huanlai and Xu, Lexi and Zhu, Zonghai and Feng, Li},
+  journal={IEEE Signal Processing Letters},
+  year={2026}
+}
+```
+
+---
+
+##  Contact
+
+For questions or collaborations:
+
+- **Huanlai Xing** (Corresponding Author)  
+- Email: exaudtarimo@my.swjtu.edu.cn  
+
+---
+
+##  Acknowledgement
+
+This work is supported by:
+
+- **Sichuan Science and Technology Program (2024NSFSC1472)**
+
