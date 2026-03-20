@@ -38,12 +38,6 @@ ECSC-MUAV addresses this by introducing a **task-oriented semantic communication
 -  **Selective Retransmission Strategy**  
   Dynamically requests retransmission only for unreliable semantic components.
 
--  **Robust to Low SNR Conditions**  
-  Maintains high inference accuracy under noisy wireless channels.
-
--  **Energy-Efficient Design**  
-  Reduces transmission cost and UAV energy consumption.
-
 ---
 
 ##  System Architecture
