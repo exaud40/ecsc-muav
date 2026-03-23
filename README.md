@@ -8,7 +8,7 @@
 §Research Institute, China United Network Communications Corporation, Beijing, China  
 **Corresponding Author:** Huanlai Xing  
 
-*Code Repository:* https://github.com/exaud40/ECSC-MUAV
+*Code Repository:* [ECSC-MUAV](https://github.com/exaud40/ECSC-MUAV)
 
 ---
 
