@@ -7,7 +7,6 @@
 ‡Engineering Research Center of Sustainable Urban Intelligent Transportation, Ministry of Education, Chengdu, China  
 §Research Institute, China United Network Communications Corporation, Beijing, China
 - ***Corresponding Author**
-
 *Code Repository:*[https://github.com/exaud40/ECSC-MUAV]
 ---
 
