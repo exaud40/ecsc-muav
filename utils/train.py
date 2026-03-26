@@ -12,7 +12,6 @@ from tqdm import tqdm
 from models.layers import EnergyNet
 from losses.energy import CompressedFeatureLoss, bitrate_loss, contrastive_energy_loss
 
-
 def train(model, clip_extractor, loader, device, epochs=10, save_path="best_model.pth"):
 
     optimizer = optim.Adam(model.parameters(),

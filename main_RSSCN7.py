@@ -6,14 +6,15 @@ from data.dataloader import get_loader_rs
 from models.model import MultiUAVSystem
 from utils.train import train
 from utils.plots import evaluate
-from utils.plots import plot_snr_for_tx_ratios,plot_power_vs_bits_rs, plot_latency_error_rs
-
+from utils.plots import plot_snr_for_tx_ratios,plot_power_vs_bits, plot_latency_vs_snr
+from checkpoints.load_model import load_best_model
 
 
 
 def main():
     
-    epochs = 200
+    epochs = 100
+    bottleneck_dim = 32
 
     os.makedirs("results", exist_ok=True)
 
@@ -23,16 +24,55 @@ def main():
 
     model = MultiUAVSystem().to(device)
     clip = CLIPFeatureExtractor_RS(device)
+    
+    
+    train(
+        model, 
+        clip, 
+        train_loader, 
+        device, 
+        epochs,
+        save_path="checkpoints/best_uav_model_RSSCN7.pth"
+        )
+    
 
-    train(model, clip, train_loader, device, epochs)
+    model=load_best_model(
+        model,
+        "checkpoints/best_uav_model_RSSCN7.pth",
+        device
+    )
+    
+
     evaluate(model, test_loader, device)
 
     print("\nGenerating Plots...\n")
-
-    plot_snr_for_tx_ratios(model, test_loader, device)
-    plot_power_vs_bits_rs()
-    plot_latency_error_rs(model, test_loader, device)
-
+    
+    
+    plot_snr_for_tx_ratios(
+        model, 
+        test_loader,
+        device,
+        bottleneck_dim,
+        filename="results/RSSCN7_acc_vs_SNR.pdf"
+        )
+    
+    
+    plot_power_vs_bits(
+        model,
+        test_loader,
+        device,
+        bottleneck_dim,
+        filename="results/RSSCN7_power_vs_bits.pdf"
+    )
+    
+    plot_latency_vs_snr(
+    model,
+    test_loader,
+    device,
+    bottleneck_dim,
+    filename="results/RSSCN7_latency_vs_snr.pdf"
+    )
+    
 
 if __name__ == "__main__":
     main()

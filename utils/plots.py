@@ -2,9 +2,12 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
+plt.rcParams['font.family'] = 'Times New Roman'
+
+tx_ratios = [0.25,0.5,0.75,1.0]
+snr_range = np.arange(0, 21, 5)
 
 def plot_accuracy_vs_snr(model, loader, device, bottleneck_dim, snr_range):
-
     accuracies = []
 
     model.eval()
@@ -50,9 +53,6 @@ def plot_accuracy_vs_snr(model, loader, device, bottleneck_dim, snr_range):
     plt.show()
 
 def plot_accuracy_vs_bits(model, loader, device, bottleneck_dim):
-
-    tx_ratios = [0.25,0.5,0.75,1.0]
-
     bits = []
 
     # feature size estimate
@@ -106,12 +106,6 @@ def plot_accuracy_vs_bits(model, loader, device, bottleneck_dim):
     plt.show()
 
 def plot_snr_for_tx_ratios(model, loader, device, bottleneck_dim, filename):
-
-    plt.rcParams['font.family'] = 'Times New Roman'
-
-    snr_range = np.arange(0, 21, 5)
-    tx_ratios = [0.25, 0.5, 0.75, 1.0]
-
     # Different markers and colors
     markers = ['o', 's', '^', 'D']
     colors = ['b', 'g', 'r', 'm']
@@ -278,16 +272,10 @@ def plot_power_vs_bits(model, loader, device, bottleneck_dim, filename):
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.show()
 
-def plot_latency_vs_psnr(model, loader, device, bottleneck_dim, filename):
-
-    plt.rcParams['font.family'] = 'Times New Roman'
-
-    # PSNR range (dynamic channel)
-    snr_range = np.arange(0, 21, 5)
-
+def plot_latency_vs_snr(model, loader, device, bottleneck_dim, filename):
     # Communication parameters
     bandwidth = 2e5        # 200 kHz UAV link
-    bits = bottleneck_dim * 2 * 32   # two UAV features and 32 FP Quantization
+    bits = bottleneck_dim * 2 * 16   # two UAV features and 16 FP Quantization
 
     latencies = []
     error_rates = []
@@ -320,9 +308,7 @@ def plot_latency_vs_psnr(model, loader, device, bottleneck_dim, filename):
         error_rate = (1 - accuracy) * 100
         error_rates.append(error_rate)
 
-        # ----------------------------
         # Communication latency
-        # ----------------------------
         snr_linear = 10 ** (snr / 10)
 
         capacity = bandwidth * np.log2(1 + snr_linear)
@@ -332,11 +318,10 @@ def plot_latency_vs_psnr(model, loader, device, bottleneck_dim, filename):
 
         latencies.append(latency_ms)
 
-        print(f"PSNR {snr} dB | Latency {latency_ms:.3f} ms | Error {error_rate:.2f}%")
+        print(f"SNR {snr} dB | Latency {latency_ms:.3f} ms | Error {error_rate:.2f}%")
 
-    # ----------------------------
+
     # Plot (Dual Axis)
-    # ----------------------------
     fig, ax1 = plt.subplots(figsize=(8,6))
     ax2 = ax1.twinx()
 
@@ -371,12 +356,9 @@ def plot_latency_vs_psnr(model, loader, device, bottleneck_dim, filename):
 
 def plot_snr_for_tx_ratios_rs(model, loader, device):
 
-    snr_range = [0,5,10,15,20]
-    ratios = [0.25,0.5,0.75,1.0]
-
     plt.figure(figsize=(8,6))
 
-    for r in ratios:
+    for r in tx_ratios:
 
         model.edge.channel.set_tx_ratio(r)
         accs=[]
@@ -408,8 +390,8 @@ def plot_snr_for_tx_ratios_rs(model, loader, device):
 
 
 def plot_power_vs_bits_rs():
-
     bits = [10,12,14,16,18]
+    
 
     tx=[]; comp=[]
 
@@ -422,8 +404,10 @@ def plot_power_vs_bits_rs():
 
         mac = b**2
         comp.append((mac*5e-12/1e-2)*1e8)
-
-    fig,ax1 = plt.subplots()
+        
+        
+    fig, ax1 = plt.subplots(figsize=(8,6))
+    #fig,ax1 = plt.subplots()
     ax2 = ax1.twinx()
 
     ax1.plot(bits,tx,'o-',label='TX Power')
@@ -435,13 +419,11 @@ def plot_power_vs_bits_rs():
     plt.savefig("results/RSSCN7_power.pdf", dpi=300, bbox_inches='tight')
     plt.show()
 
-
 def plot_latency_error_rs(model, loader, device):
-
-    snr=[0,5,10,15,20]
+    
     lat=[]; err=[]
 
-    for s in snr:
+    for s in snr_range:
 
         model.edge.channel.set_snr(s)
 
@@ -458,20 +440,19 @@ def plot_latency_error_rs(model, loader, device):
 
         cap = 2e5*np.log2(1+10**(s/10))
         lat.append((32*2*32)/cap*1000)
-
-    fig,ax1 = plt.subplots()
+    
+    fig, ax1 = plt.subplots(figsize=(8,6))
+    #fig,ax1 = plt.subplots()
     ax2 = ax1.twinx()
 
-    ax1.plot(snr,lat,'o-',label='Latency')
-    ax2.plot(snr,err,'s--',label='Error')
+    ax1.plot(snr_range,lat,'o-',label='Latency')
+    ax2.plot(snr_range,err,'s--',label='Error')
 
     ax1.set_ylabel("Latency (ms)")
     ax2.set_ylabel("Error (%)")
 
     plt.savefig("results/RSSCN7_latency.pdf", dpi=300, bbox_inches='tight')
     plt.show()
-
-
 
 
 
@@ -501,9 +482,6 @@ def evaluate(model, loader, device):
 
 
 def evaluate_bits(model, loader, device):
-
-    tx_ratios = [0.25,0.5,0.75,1.0]
-
     model.eval()
 
     for ratio in tx_ratios:
