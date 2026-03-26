@@ -54,19 +54,7 @@ ECSC-MUAV addresses this by introducing a **task-oriented semantic communication
 6. Energy-based semantic calibration (EnergyNet)  
 7. Task-specific inference  
 
----
-
-##  Results
-
-ECSC-MUAV demonstrates strong performance on remote sensing datasets:
-
-###  Key Outcomes
--  **+4% ~ 7% accuracy improvement** under low SNR  
--  **Up to 18% reduction in energy consumption**  
--  Improved robustness to:
-  - Channel noise  
-  - UAV drop-out  
-  - Bandwidth constraints  
+--- 
 
 ###  Datasets
 - **UC Merced Land Use**
