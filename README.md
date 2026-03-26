@@ -91,8 +91,6 @@ git clone https://github.com/exaud40/ECSC-MUAV.git
 cd ECSC-MUAV
 ```
 
-*(Add training/inference scripts here when ready)*
-
 ---
 
 ##  Method Highlights
