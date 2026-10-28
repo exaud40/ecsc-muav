@@ -59,6 +59,7 @@ ECSC-MUAV addresses this by introducing a **task-oriented semantic communication
 ###  Datasets
 - **UC Merced Land Use**
 - **RSSCN7**
+- **NWPU-RESISC45**
 
 ---
 
