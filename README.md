@@ -8,7 +8,7 @@
 §Research Institute, China United Network Communications Corporation, Beijing, China  
 **Corresponding Author:** Huanlai Xing  
 
-*Code Repository:* [ECSC-MUAV](https://github.com/exaud40/ECSC-MUAV)
+*Code Repository:* [ECSC-MUAV](https://github.com/exaud40/ecsc-muav)
 
 ---
 
@@ -47,7 +47,7 @@ ECSC-MUAV addresses this by introducing a **task-oriented semantic communication
 
 **Pipeline Overview:**
 1. UAVs capture multi-view images  
-2. CLIP-based feature extraction  
+2. CLIP-based teacher feature extraction  
 3. Lightweight semantic encoding  
 4. Transmission over noisy wireless channel  
 5. Edge server decoding + feature fusion  
