@@ -88,7 +88,7 @@ pip install torch torchvision transformers tqdm thop
 ##  Getting Started
 
 ```bash
-git clone https://github.com/exaud40/ECSC-MUAV.git
+git clone https://github.com/exaud40/ecsc-muav.git
 cd ECSC-MUAV
 ```
 
