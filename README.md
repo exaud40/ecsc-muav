@@ -1,6 +1,4 @@
-#  Energy-Calibrated Task-Oriented Communication for Cooperative Multi-UAV Edge Inference
-
-## Authors
+# Energy-Calibrated Task-Oriented Communication for Cooperative Multi-UAV Edge Inference
 
 **Authors:** Exaud Tarimo†‡, Huanlai Xing†‡*, Lexi Xu§, Zonghai Zhu† and Li Feng†  
 †School of Computing and Artificial Intelligence, Southwest Jiaotong University, Chengdu, China  
@@ -8,106 +6,227 @@
 §Research Institute, China United Network Communications Corporation, Beijing, China  
 **Corresponding Author:** Huanlai Xing  
 
-*Code Repository:* [ECSC-MUAV](https://github.com/exaud40/ecsc-muav)
+*Code repository:* [ECSC-MUAV](https://github.com/exaud40/ecsc-muav)
 
 ---
 
-##  Overview
+## Overview
 
-This repository provides the official implementation of:
+This repository provides the official implementation of **Energy-Calibrated Semantic Communication for Multi-UAV (ECSC-MUAV)**.
 
-> **Energy-Calibrated Semantic Communication for Multi-UAV (ECSC-MUAV)**
+Multi-UAV systems are increasingly used for collaborative perception and real-time edge intelligence in next-generation wireless networks, but sending high-dimensional observations over bandwidth-limited, noisy channels is costly. ECSC-MUAV is a task-oriented semantic communication framework in which:
 
-Multi-UAV systems are increasingly used for collaborative perception and real-time edge intelligence in next-generation wireless networks. However, transmitting high-dimensional data over bandwidth-limited and noisy channels introduces significant challenges.
+- each UAV encodes **its own view** with a lightweight encoder into a compact feature vector;
+- the features are sent over a noisy (AWGN, Rayleigh or Rician) channel and fused at an edge server for inference task;
+- the server stops as soon as its prediction is confident enough, so extra UAVs are asked to transmit only when needed (**confidence-based early exit**);
+- during **training only**, a frozen CLIP teacher and an energy-based model (EnergyNet) calibrate the server's fused feature, which improves accuracy at low SNR without adding any cost at inference.
 
-ECSC-MUAV addresses this by introducing a **task-oriented semantic communication framework** that:
-- Reduces redundant transmissions
-- Preserves task-relevant semantic information
-- Improves robustness under low SNR conditions
-- Optimizes energy consumption for UAV systems
+## Key Features
 
----
+- **Lightweight onboard encoder.** Applied to the UAV's own view only and no CLIP on board.
+- **Energy-based calibration (EnergyNet, training only).** A pairwise energy model aligns the server's projected feature with the CLIP embedding of the full image using a contrastive hinge loss. Neither CLIP nor EnergyNet is used at inference.
+- **Confidence-based selective retransmission.** UAV 1 transmits first. After each round the server classifies from the UAVs received so far and stops if the maximum softmax probability is at least `delta`; otherwise the next UAV transmits. One stop/continue message is fed back between rounds.
+- **Flexible transmission budget.** A random fraction `ratio` of the feature symbols is sent, so one model covers several bit budgets.
+- **Full evaluation grid.** Accuracy, rounds, transmitted bits and latency over channels, SNRs, bit budgets and early-exit thresholds, with an estimate of onboard complexity.
 
-##  Key Features
-
--  **Lightweight Semantic Encoder**  
-  Extracts compact and task-relevant representations from high-dimensional UAV observations.
-
--  **Energy-Based Calibration (EnergyNet)**  
-  Enforces semantic alignment between transmitted and fused features using an energy-based model.
-
--  **Selective Retransmission Strategy**  
-  Dynamically requests retransmission only for unreliable semantic components.
-
----
-
-##  System Architecture
+## Proposed Architecture
 
 ![System Architecture](figures/system_architecture.png)
 
-**Pipeline Overview:**
-1. UAVs capture multi-view images  
-2. CLIP-based teacher feature extraction  
-3. Lightweight semantic encoding  
-4. Transmission over noisy wireless channel  
-5. Edge server decoding + feature fusion  
-6. Energy-based semantic calibration (EnergyNet)  
-7. Task-specific inference  
-
---- 
-
-###  Datasets
-- **UC Merced Land Use**
-- **RSSCN7**
-- **NWPU-RESISC45**
+1. Each UAV observes its own view (see [Views](#uav-views)).
+2. Each UAV encodes its view and power-normalises the feature.
+3. The feature is transmitted over the wireless channel.
+4. The edge server decodes the received features (missing UAVs are zero-filled) and classifies.
+5. Early exit: the server stops if confident, otherwise it requests the next UAV.
+6. **Training only:** a frozen CLIP teacher sees the full image, and EnergyNet calibrates the server's projected feature against the CLIP embedding.
 
 ---
 
-##  Requirements
-
-###  Environment
-- Python 3.1x
-- PyTorch 2.5.x
-
-###  Dependencies
+## Repository Structure
 
 ```
--NumPy
--Matplotlib
--Scikit-image
-```
-
-###  Install Packages
-
-```bash
-pip install torch torchvision transformers tqdm thop
+ecsc-muav/
+├── main.py                  # entry point: train / eval / tables
+├── config.py                # every hyper-parameter and cost-model assumption
+├── train.py                 # training loop (checkpoint chosen on validation accuracy)
+├── eval_all.py              # full evaluation grid -> one JSON per run
+├── make_tables.py           # CSV / LaTeX tables and figures from the JSON files
+├── requirements.txt
+├── data/
+│   └── dataloader.py        # dataset splits and loaders
+├── models/
+│   ├── net.py               # MultiUAV model and training loss
+│   ├── encoder.py           # onboard CNN encoder
+│   ├── decoder.py           # server fusion decoder
+│   ├── channel.py           # AWGN / Rayleigh / Rician channel
+│   ├── views.py             # emulated UAV views
+│   ├── energy.py            # EnergyNet and contrastive energy loss
+│   └── feature_extractor.py # frozen CLIP teacher
+└── utils/
+    ├── common.py            # seeding, device, JSON helpers
+    ├── evaluate.py          # logits collection and early exit
+    ├── costs.py             # bits, latency, complexity
+    └── plots.py             # figures
 ```
 
 ---
 
-##  Getting Started
+## Datasets
+
+| `--dataset`     | Dataset            | Classes | Split used                                              |
+|-----------------|--------------------|---------|---------------------------------------------------------|
+| `uc_merced`     | UC Merced Land Use | 21      | stratified 70 / 10 / 20 (train / val / test)            |
+| `rsscn`         | RSSCN7             | 7       | stratified 70 / 10 / 20 (train / val / test)            |
+| `nwpu_resisc45` | NWPU-RESISC45      | 45      | provided `train/` and `test/`; 10 % of `train/` for val |
+
+Download the datasets from their official sources and arrange them as below. These are the default locations; use `--data_root <path>` to put them anywhere else.
+
+```
+data/
+├── UCMerced_LandUse/Images/<class_name>/*.tif        # uc_merced
+├── RSSCN7/<class_name>/*.jpg                         # rsscn
+└── NWPU-RESISC45/
+    ├── train/<class_name>/*.jpg                      # nwpu_resisc45
+    └── test/<class_name>/*.jpg
+```
+
+`uc_merced` and `rsscn` use a single folder with one sub-folder per class, split internally with `--split 0.7 0.1 0.2`. `nwpu_resisc45` needs `train/` and `test/` folders, and the validation set is carved out of `train/` (`--val_frac`, default 0.1). In all cases the split is fixed by `--split_seed` (default 0), so every seed and every variant is evaluated on exactly the same test images.
+
+---
+
+## Installation
+
+Requires Python 3.10+ and PyTorch 2.1+.
 
 ```bash
 git clone https://github.com/exaud40/ecsc-muav.git
-cd ECSC-MUAV
+cd ecsc-muav
+pip install -r requirements.txt
 ```
 
----
+`requirements.txt` installs `torch`, `torchvision`, `transformers`, `numpy`, `matplotlib`, `tqdm`, `pillow` and `thop`.
 
-##  Method Highlights
-
-### 🔹 Energy-Calibrated Semantic Alignment
-- Models semantic consistency using an **energy function**
-- Lower energy → stronger alignment between UAV features
-
-### 🔹 Selective Retransmission
-- Confidence-driven stopping criterion
-- Attention-based UAV scheduling
-- Minimizes unnecessary communication
+The first run with the `ecsc` or `cosine_distill` variants downloads the CLIP teacher (`openai/clip-vit-base-patch32`) from Hugging Face.
 
 ---
 
-##  Citation
+## Usage
+
+Run everything from the repository root. `--phase` selects what to run: `train`, `eval`, `tables`, or `all` (default).
+
+### Quick start: full pipeline on one dataset
+
+```bash
+python main.py --dataset uc_merced --variant ecsc --seed 0
+```
+
+This trains the model, evaluates the best checkpoint on the test set over the full channel/SNR/bit-budget/threshold grid, and builds the tables and figures.
+
+### Other datasets
+
+```bash
+python main.py --dataset rsscn         --data_root /path/to/RSSCN7
+python main.py --dataset nwpu_resisc45 --data_root /path/to/NWPU-RESISC45
+```
+
+### Individual phases
+
+```bash
+python main.py --phase train  --dataset uc_merced --variant no_teacher --seed 1
+python main.py --phase eval   --dataset uc_merced --variant no_teacher --seed 1
+python main.py --phase tables
+```
+
+`eval` loads the checkpoint of the matching run, so it must use the same `--dataset`, `--variant`, `--K`, `--view_mode`, `--train_channels` and `--seed` as `train`.
+
+### Model variants
+
+| `--variant`      | Teacher term during training                                          |
+|------------------|-----------------------------------------------------------------------|
+| `ecsc` (default) | contrastive energy loss between the CLIP embedding and the projected fused feature (EnergyNet) |
+| `cosine_distill` | control: `1 - cos(projection, CLIP embedding)`, no EnergyNet          |
+| `no_teacher`     | none; CLIP is not loaded, so no download is needed                    |
+
+### Reproducing the results
+
+Run each variant over several seeds, then build the tables. Mean and standard deviation are computed over seeds.
+
+```bash
+for ds in uc_merced rsscn nwpu_resisc45; do
+  for variant in ecsc cosine_distill no_teacher; do
+    for seed in 0 1 2; do
+      python main.py --phase all --dataset $ds --variant $variant --seed $seed
+    done
+  done
+done
+python main.py --phase tables
+```
+
+### Other options
+
+```bash
+# One model for all channels (training with fading)
+python main.py --dataset uc_merced --train_channels awgn rayleigh rician
+
+# Overlapping random-crop views and a different number of UAVs
+python main.py --dataset uc_merced --view_mode overlap --K 4
+
+# Windows or low-memory machines: avoid DataLoader worker problems
+python main.py --dataset uc_merced --num_workers 0
+```
+
+Every option and its default is listed in [`config.py`](config.py). Run `python main.py --help` for the full list.
+
+### Smoke test (not for reported results)
+
+To check that the whole pipeline runs end to end:
+
+```bash
+python main.py --dataset rsscn --data_root <path> --epochs 1 \
+    --eval_snrs 10 --eval_channels awgn --clip_name stub
+```
+
+> **Note: `--clip_name stub` is for smoke tests only.** It replaces CLIP with a tiny randomly initialised network, so the teacher carries no semantic information. The stub only affects those two variants; `no_teacher` does not use a teacher at all.
+
+### Choosing the teacher for real experiments
+
+For reported results, leave `--clip_name` at its default (`openai/clip-vit-base-patch32`, 512-d embedding). Another CLIP model can be used, as long as `--teacher_dim` equals that model's projection dimension (the code checks this):
+
+```bash
+# CLIP ViT-B/16 (512-d)
+python main.py --dataset uc_merced --clip_name openai/clip-vit-base-patch16 --teacher_dim 512
+
+# CLIP ViT-L/14 (768-d)
+python main.py --dataset uc_merced --clip_name openai/clip-vit-large-patch14 --teacher_dim 768
+```
+
+A local folder with a downloaded CLIP checkpoint also works as `--clip_name`. To run without any teacher, use `--variant no_teacher`.
+
+---
+
+## Outputs
+
+| Location                                  | Content                                                                 |
+|-------------------------------------------|-------------------------------------------------------------------------|
+| `checkpoints/<run>.pt`                    | best checkpoint (selected on validation accuracy; CLIP weights excluded)|
+| `results/logs/<run>_log.json`             | per-epoch training loss, training accuracy and validation accuracy      |
+| `results/<run>.json`                      | full test results of one run, with the exact configuration, git commit and the early-exit threshold `delta*` chosen on the validation set |
+| `results/tables/full.csv`, `early_exit.csv`, `complexity.json` | aggregated results over seeds, all datasets together |
+| `results/tables/<dataset>/`               | accuracy-vs-SNR figures, early-exit trade-off figure and LaTeX tables per dataset |
+
+`<run>` is `<dataset>_<variant>_K<K>_<view_mode>_<train_channels>_seed<seed>`. Every number in the tables is built from the `results/*.json` files; nothing is typed by hand.
+
+---
+## Channel and Cost Model
+
+- Features are power-normalised to unit power per real element; SNR is defined per real element.
+- Rayleigh and Rician channels use block fading with perfect CSI at the server and an MMSE equaliser (Rician K-factor `--rician_k_lin`, default 10).
+- Latency assumes Shannon capacity at the average SNR.
+- The cost model rests on assumptions defined in `config.py`: bit depth per feature element (`bits_per_element`), bandwidth (`bandwidth_hz`), feedback size (`feedback_bits`), distance (`distance_m`) and energy per MAC (`joule_per_mac`). Encoder and server times are measured on the machine running the code, and the onboard energy figure is `MACs × joule_per_mac`.
+
+---
+
+## Citation
 
 If you find this work useful, please cite:
 
@@ -120,18 +239,10 @@ If you find this work useful, please cite:
 }
 ```
 
----
+## Contact
 
-##  Contact
+For questions or collaborations: exaudtarimo@my.swjtu.edu.cn
 
-For questions or collaborations:
-- Email: exaudtarimo@my.swjtu.edu.cn  
+## Acknowledgement
 
----
-
-##  Acknowledgement
-
-This work is supported by:
-
-- **Sichuan Science and Technology Program (2024NSFSC1472)**
-
+This work is supported by the **Sichuan Science and Technology Program (2024NSFSC1472)**.
