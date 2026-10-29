@@ -47,10 +47,7 @@ Multi-UAV systems are increasingly used for collaborative perception and real-ti
 ```
 ecsc-muav/
 ├── main.py                  
-├── config.py                
-├── train.py                 
-├── eval_all.py              
-├── make_tables.py          
+├── config.py                                                      
 ├── requirements.txt
 ├── data/
 │   └── dataloader.py        
@@ -63,9 +60,11 @@ ecsc-muav/
 │   ├── energy.py            
 │   └── feature_extractor.py 
 └── utils/
-    ├── common.py           
-    ├── evaluate.py         
-    ├── costs.py             
+    ├── train.py 
+    ├── common.py                   
+    ├── costs.py
+    ├── eval_all.py
+    ├── make_tables.py              
     └── plots.py            
 ```
 
