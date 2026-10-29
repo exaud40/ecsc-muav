@@ -16,9 +16,9 @@ This repository provides the official implementation of **Energy-Calibrated Sema
 
 Multi-UAV systems are increasingly used for collaborative perception and real-time edge intelligence in next-generation wireless networks, but sending high-dimensional observations over bandwidth-limited, noisy channels is costly. ECSC-MUAV is a task-oriented semantic communication framework in which:
 
-- each UAV encodes **its own view** with a lightweight encoder into a compact feature vector;
-- the features are sent over a noisy (AWGN, Rayleigh or Rician) channel and fused at an edge server for inference task;
-- the server stops as soon as its prediction is confident enough, so extra UAVs are asked to transmit only when needed (**confidence-based early exit**);
+- each UAV encodes **its own view** with a lightweight encoder into a compact feature vector
+- the features are sent over a noisy (AWGN, Rayleigh or Rician) channel and fused at an edge server for inference task
+- the server stops as soon as its prediction is confident enough, so extra UAVs are asked to transmit only when needed (**confidence-based early exit**)
 - during **training only**, a frozen CLIP teacher and an energy-based model (EnergyNet) calibrate the server's fused feature, which improves accuracy at low SNR without adding any cost at inference.
 
 ## Key Features
@@ -27,7 +27,7 @@ Multi-UAV systems are increasingly used for collaborative perception and real-ti
 - **Energy-based calibration (EnergyNet, training only).** A pairwise energy model aligns the server's projected feature with the CLIP embedding of the full image using a contrastive hinge loss. Neither CLIP nor EnergyNet is used at inference.
 - **Confidence-based selective retransmission.** UAV 1 transmits first. After each round the server classifies from the UAVs received so far and stops if the maximum softmax probability is at least `delta`; otherwise the next UAV transmits. One stop/continue message is fed back between rounds.
 - **Flexible transmission budget.** A random fraction `ratio` of the feature symbols is sent, so one model covers several bit budgets.
-- **Full evaluation grid.** Accuracy, rounds, transmitted bits and latency over channels, SNRs, bit budgets and early-exit thresholds, with an estimate of onboard complexity.
+  
 
 ## Proposed Architecture
 
@@ -46,27 +46,27 @@ Multi-UAV systems are increasingly used for collaborative perception and real-ti
 
 ```
 ecsc-muav/
-├── main.py                  # entry point: train / eval / tables
-├── config.py                # every hyper-parameter and cost-model assumption
-├── train.py                 # training loop (checkpoint chosen on validation accuracy)
-├── eval_all.py              # full evaluation grid -> one JSON per run
-├── make_tables.py           # CSV / LaTeX tables and figures from the JSON files
+├── main.py                  
+├── config.py                
+├── train.py                 
+├── eval_all.py              
+├── make_tables.py          
 ├── requirements.txt
 ├── data/
-│   └── dataloader.py        # dataset splits and loaders
+│   └── dataloader.py        
 ├── models/
-│   ├── net.py               # MultiUAV model and training loss
-│   ├── encoder.py           # onboard CNN encoder
-│   ├── decoder.py           # server fusion decoder
-│   ├── channel.py           # AWGN / Rayleigh / Rician channel
-│   ├── views.py             # emulated UAV views
-│   ├── energy.py            # EnergyNet and contrastive energy loss
-│   └── feature_extractor.py # frozen CLIP teacher
+│   ├── net.py               
+│   ├── encoder.py           
+│   ├── decoder.py           
+│   ├── channel.py           
+│   ├── views.py             
+│   ├── energy.py            
+│   └── feature_extractor.py 
 └── utils/
-    ├── common.py            # seeding, device, JSON helpers
-    ├── evaluate.py          # logits collection and early exit
-    ├── costs.py             # bits, latency, complexity
-    └── plots.py             # figures
+    ├── common.py           
+    ├── evaluate.py         
+    ├── costs.py             
+    └── plots.py            
 ```
 
 ---
@@ -106,7 +106,7 @@ pip install -r requirements.txt
 
 `requirements.txt` installs `torch`, `torchvision`, `transformers`, `numpy`, `matplotlib`, `tqdm`, `pillow` and `thop`.
 
-The first run with the `ecsc` or `cosine_distill` variants downloads the CLIP teacher (`openai/clip-vit-base-patch32`) from Hugging Face.
+The first run with the `ecsc` or `cosine_distill` variants downloads the CLIP teacher (`openai/clip-vit-base-patch32`) from [Hugging Face](https://huggingface.co/openai/clip-vit-base-patch32).
 
 ---
 
@@ -212,20 +212,11 @@ A local folder with a downloaded CLIP checkpoint also works as `--clip_name`. To
 | `results/logs/<run>_log.json`             | per-epoch training loss, training accuracy and validation accuracy      |
 | `results/<run>.json`                      | full test results of one run, with the exact configuration, git commit and the early-exit threshold `delta*` chosen on the validation set |
 | `results/tables/full.csv`, `early_exit.csv`, `complexity.json` | aggregated results over seeds, all datasets together |
-| `results/tables/<dataset>/`               | accuracy-vs-SNR figures, early-exit trade-off figure and LaTeX tables per dataset |
+| `results/tables/<dataset>/`               | accuracy-vs-SNR figures, early-exit trade-off figure and tables per dataset |
 
 `<run>` is `<dataset>_<variant>_K<K>_<view_mode>_<train_channels>_seed<seed>`. Every number in the tables is built from the `results/*.json` files; nothing is typed by hand.
 
 ---
-## Channel and Cost Model
-
-- Features are power-normalised to unit power per real element; SNR is defined per real element.
-- Rayleigh and Rician channels use block fading with perfect CSI at the server and an MMSE equaliser (Rician K-factor `--rician_k_lin`, default 10).
-- Latency assumes Shannon capacity at the average SNR.
-- The cost model rests on assumptions defined in `config.py`: bit depth per feature element (`bits_per_element`), bandwidth (`bandwidth_hz`), feedback size (`feedback_bits`), distance (`distance_m`) and energy per MAC (`joule_per_mac`). Encoder and server times are measured on the machine running the code, and the onboard energy figure is `MACs × joule_per_mac`.
-
----
-
 ## Citation
 
 If you find this work useful, please cite:
