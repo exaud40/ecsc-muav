@@ -12,33 +12,16 @@
 
 ## Overview
 
-This repository provides the official implementation of **Energy-Calibrated Semantic Communication for Multi-UAV (ECSC-MUAV)**.
-
-Multi-UAV systems are increasingly used for collaborative perception and real-time edge intelligence in next-generation wireless networks, but sending high-dimensional observations over bandwidth-limited, noisy channels is costly. ECSC-MUAV is a task-oriented semantic communication framework in which:
-
+This repository provides the implementation of **Energy-Calibrated Semantic Communication for Multi-UAV (ECSC-MUAV)**.
+ECSC-MUAV is a task-oriented semantic communication framework in which:
 - each UAV encodes **its own view** with a lightweight encoder into a compact feature vector
 - the features are sent over a noisy (AWGN, Rayleigh or Rician) channel and fused at an edge server for inference task
 - the server stops as soon as its prediction is confident enough, so extra UAVs are asked to transmit only when needed (**confidence-based early exit**)
 - during **training only**, a frozen CLIP teacher and an energy-based model (EnergyNet) calibrate the server's fused feature, which improves accuracy at low SNR without adding any cost at inference.
 
-## Key Features
-
-- **Lightweight onboard encoder.** Applied to the UAV's own view only and no CLIP on board.
-- **Energy-based calibration (EnergyNet, training only).** A pairwise energy model aligns the server's projected feature with the CLIP embedding of the full image using a contrastive hinge loss. Neither CLIP nor EnergyNet is used at inference.
-- **Confidence-based selective retransmission.** UAV 1 transmits first. After each round the server classifies from the UAVs received so far and stops if the maximum softmax probability is at least `delta`; otherwise the next UAV transmits. One stop/continue message is fed back between rounds.
-- **Flexible transmission budget.** A random fraction `ratio` of the feature symbols is sent, so one model covers several bit budgets.
-  
-
 ## Proposed Architecture
 
 ![System Architecture](figures/system_architecture.png)
-
-1. Each UAV observes its own view (see [Views](#uav-views)).
-2. Each UAV encodes its view and power-normalises the feature.
-3. The feature is transmitted over the wireless channel.
-4. The edge server decodes the received features (missing UAVs are zero-filled) and classifies.
-5. Early exit: the server stops if confident, otherwise it requests the next UAV.
-6. **Training only:** a frozen CLIP teacher sees the full image, and EnergyNet calibrates the server's projected feature against the CLIP embedding.
 
 ---
 
