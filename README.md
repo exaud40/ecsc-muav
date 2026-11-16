@@ -10,15 +10,6 @@
 
 ---
 
-## Overview
-
-This repository provides the implementation of **Energy-Calibrated Semantic Communication for Multi-UAV (ECSC-MUAV)**.
-ECSC-MUAV is a task-oriented semantic communication framework in which:
-- each UAV encodes **its own view** with a lightweight encoder into a compact feature vector
-- the features are sent over a noisy (AWGN, Rayleigh or Rician) channel and fused at an edge server for inference task
-- the server stops as soon as its prediction is confident enough, so extra UAVs are asked to transmit only when needed (**confidence-based early exit**)
-- during **training only**, a frozen CLIP teacher and an energy-based model (EnergyNet) calibrate the server's fused feature, which improves accuracy at low SNR without adding any cost at inference.
-
 ## Proposed Architecture
 
 ![System Architecture](figures/system_architecture.png)
