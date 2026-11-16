@@ -72,11 +72,8 @@ data/
     └── test/<class_name>/*.jpg
 ```
 
-`uc_merced` and `rsscn` use a single folder with one sub-folder per class, split internally with `--split 0.7 0.1 0.2`. `nwpu_resisc45` needs `train/` and `test/` folders, and the validation set is carved out of `train/` (`--val_frac`, default 0.1). In all cases the split is fixed by `--split_seed` (default 0), so every seed and every variant is evaluated on exactly the same test images.
 
----
-
-## Installation
+## Get Started
 
 Requires Python 3.10+ and PyTorch 2.1+.
 
@@ -86,15 +83,11 @@ cd ecsc-muav
 pip install -r requirements.txt
 ```
 
-`requirements.txt` installs `torch`, `torchvision`, `transformers`, `numpy`, `matplotlib`, `tqdm`, `pillow` and `thop`.
-
-The first run with the `ecsc` or `cosine_distill` variants downloads the CLIP teacher (`openai/clip-vit-base-patch32`) from [Hugging Face](https://huggingface.co/openai/clip-vit-base-patch32).
-
 ---
 
 ## Usage
 
-Run everything from the repository root. `--phase` selects what to run: `train`, `eval`, `tables`, or `all` (default).
+Run everything from the repository root. `--phase` selects what to run: `train`, `eval`, or `all` (default).
 
 ### Quick start: full pipeline on one dataset
 
@@ -102,36 +95,7 @@ Run everything from the repository root. `--phase` selects what to run: `train`,
 python main.py --dataset uc_merced --variant ecsc --seed 0
 ```
 
-This trains the model, evaluates the best checkpoint on the test set over the full channel/SNR/bit-budget/threshold grid, and builds the tables and figures.
-
-### Other datasets
-
-```bash
-python main.py --dataset rsscn         --data_root /path/to/RSSCN7
-python main.py --dataset nwpu_resisc45 --data_root /path/to/NWPU-RESISC45
-```
-
-### Individual phases
-
-```bash
-python main.py --phase train  --dataset uc_merced --variant no_teacher --seed 1
-python main.py --phase eval   --dataset uc_merced --variant no_teacher --seed 1
-python main.py --phase tables
-```
-
-`eval` loads the checkpoint of the matching run, so it must use the same `--dataset`, `--variant`, `--K`, `--view_mode`, `--train_channels` and `--seed` as `train`.
-
-### Model variants
-
-| `--variant`      | Teacher term during training                                          |
-|------------------|-----------------------------------------------------------------------|
-| `ecsc` (default) | contrastive energy loss between the CLIP embedding and the projected fused feature (EnergyNet) |
-| `cosine_distill` | control: `1 - cos(projection, CLIP embedding)`, no EnergyNet          |
-| `no_teacher`     | none; CLIP is not loaded, so no download is needed                    |
-
 ### Reproducing the results
-
-Run each variant over several seeds, then build the tables. Mean and standard deviation are computed over seeds.
 
 ```bash
 for ds in uc_merced rsscn nwpu_resisc45; do
@@ -144,59 +108,7 @@ done
 python main.py --phase tables
 ```
 
-### Other options
 
-```bash
-# One model for all channels (training with fading)
-python main.py --dataset uc_merced --train_channels awgn rayleigh rician
-
-# Overlapping random-crop views and a different number of UAVs
-python main.py --dataset uc_merced --view_mode overlap --K 4
-
-# Windows or low-memory machines: avoid DataLoader worker problems
-python main.py --dataset uc_merced --num_workers 0
-```
-
-Every option and its default is listed in [`config.py`](config.py). Run `python main.py --help` for the full list.
-
-### Smoke test (not for reported results)
-
-To check that the whole pipeline runs end to end:
-
-```bash
-python main.py --dataset rsscn --data_root <path> --epochs 1 \
-    --eval_snrs 10 --eval_channels awgn --clip_name stub
-```
-
-> **Note: `--clip_name stub` is for smoke tests only.** It replaces CLIP with a tiny randomly initialised network, so the teacher carries no semantic information. The stub only affects those two variants; `no_teacher` does not use a teacher at all.
-
-### Choosing the teacher for real experiments
-
-For reported results, leave `--clip_name` at its default (`openai/clip-vit-base-patch32`, 512-d embedding). Another CLIP model can be used, as long as `--teacher_dim` equals that model's projection dimension (the code checks this):
-
-```bash
-# CLIP ViT-B/16 (512-d)
-python main.py --dataset uc_merced --clip_name openai/clip-vit-base-patch16 --teacher_dim 512
-
-# CLIP ViT-L/14 (768-d)
-python main.py --dataset uc_merced --clip_name openai/clip-vit-large-patch14 --teacher_dim 768
-```
-
-A local folder with a downloaded CLIP checkpoint also works as `--clip_name`. To run without any teacher, use `--variant no_teacher`.
-
----
-
-## Outputs
-
-| Location                                  | Content                                                                 |
-|-------------------------------------------|-------------------------------------------------------------------------|
-| `checkpoints/<run>.pt`                    | best checkpoint (selected on validation accuracy; CLIP weights excluded)|
-| `results/logs/<run>_log.json`             | per-epoch training loss, training accuracy and validation accuracy      |
-| `results/<run>.json`                      | full test results of one run, with the exact configuration, git commit and the early-exit threshold `delta*` chosen on the validation set |
-| `results/tables/full.csv`, `early_exit.csv`, `complexity.json` | aggregated results over seeds, all datasets together |
-| `results/tables/<dataset>/`               | accuracy-vs-SNR figures, early-exit trade-off figure and tables per dataset |
-
-`<run>` is `<dataset>_<variant>_K<K>_<view_mode>_<train_channels>_seed<seed>`. Every number in the tables is built from the `results/*.json` files; nothing is typed by hand.
 
 ---
 ## Citation
